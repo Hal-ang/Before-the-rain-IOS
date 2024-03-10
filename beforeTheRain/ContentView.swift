@@ -1,61 +1,51 @@
-//
-//  ContentView.swift
-//  beforeTheRain
-//
-//  Created by 정하랑 on 3/10/24.
-//
-
 import SwiftUI
-import SwiftData
 
-struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+import UIKit
+import WebKit
 
-    var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            Text("Select an item")
-        }
+class MyViewController: UIViewController, WKUIDelegate {
+    
+    var webView: WKWebView!
+    
+    override func loadView() {
+        let webConfiguration = WKWebViewConfiguration()
+        webView = WKWebView(frame: .zero, configuration: webConfiguration)
+        
+        webView.uiDelegate = self
+        view = webView
     }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        let myURL = URL(string:"https://enormously-pretty-weevil.ngrok-free.app")
+        let myRequest = URLRequest(url: myURL!)
+        webView.load(myRequest)
     }
 }
 
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+struct MyView: UIViewControllerRepresentable {
+
+    typealias UIViewControllerType = MyViewController
+    
+    func makeUIViewController(context: Context) -> MyViewController {
+        let vc = MyViewController()
+        // Do some configurations here if needed.
+        return vc
+    }
+    
+    func updateUIViewController(_ uiViewController: MyViewController, context: Context) {
+        // Updates the state of the specified view controller with new information from SwiftUI.
+    }
+
+}
+
+struct ContentView: View {
+    var body: some View {
+        MyView()
+    }
+}
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
 }

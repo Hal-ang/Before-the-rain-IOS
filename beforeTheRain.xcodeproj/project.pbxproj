@@ -15,6 +15,7 @@
 		3F3B828A2B9DDD7F001638A8 /* beforeTheRainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3B82892B9DDD7F001638A8 /* beforeTheRainTests.swift */; };
 		3F3B82942B9DDD7F001638A8 /* beforeTheRainUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3B82932B9DDD7F001638A8 /* beforeTheRainUITests.swift */; };
 		3F3B82962B9DDD7F001638A8 /* beforeTheRainUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3B82952B9DDD7F001638A8 /* beforeTheRainUITestsLaunchTests.swift */; };
+		3F3B82A42B9DE55C001638A8 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3F3B82A32B9DE55C001638A8 /* WebKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +47,7 @@
 		3F3B828F2B9DDD7F001638A8 /* beforeTheRainUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = beforeTheRainUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F3B82932B9DDD7F001638A8 /* beforeTheRainUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = beforeTheRainUITests.swift; sourceTree = "<group>"; };
 		3F3B82952B9DDD7F001638A8 /* beforeTheRainUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = beforeTheRainUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		3F3B82A32B9DE55C001638A8 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,6 +55,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3F3B82A42B9DE55C001638A8 /* WebKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,6 +83,7 @@
 				3F3B82882B9DDD7F001638A8 /* beforeTheRainTests */,
 				3F3B82922B9DDD7F001638A8 /* beforeTheRainUITests */,
 				3F3B82742B9DDD7A001638A8 /* Products */,
+				3F3B82A22B9DE55B001638A8 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -128,6 +132,14 @@
 				3F3B82952B9DDD7F001638A8 /* beforeTheRainUITestsLaunchTests.swift */,
 			);
 			path = beforeTheRainUITests;
+			sourceTree = "<group>";
+		};
+		3F3B82A22B9DE55B001638A8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3F3B82A32B9DE55C001638A8 /* WebKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
