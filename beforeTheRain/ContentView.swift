@@ -14,6 +14,8 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
         let userContentController = WKUserContentController()
         userContentController.add(self, name: "notificationPermissionRequest")
         userContentController.add(self, name: "locationPermissionRequest")
+        userContentController.add(self, name: "setLocationServicesEnabled")
+        userContentController.add(self, name: "setNotificationPermissionEnabled")
         webConfiguration.userContentController = userContentController
         
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
@@ -32,6 +34,7 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
         
         requestNotificationPermission()
         requestLocationPermission()
+        checkPermissiionEnabled()
     }
     
     // 푸시 알림 권한을 요청하고, 결과를 웹뷰 내의 자바스크립트 함수 setNotificationPermission으로 전달
@@ -39,13 +42,12 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
     func requestNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, error in
             DispatchQueue.main.async {
-                if granted {
                     print("푸시 알림 권한을 사용자가 허용했습니다.")
-                    self?.webView.evaluateJavaScript("setNotificationPermission(true)")
-                } else {
-                    print("푸시 알림 권한을 사용자가 거부했습니다.")
-                    self?.webView.evaluateJavaScript("setNotificationPermission(false)")
-                }
+                        let jsCode = """
+                            window.notificationPermissionEnabled = '\(granted)';
+                        """
+
+                    self?.webView.evaluateJavaScript(jsCode)
             }
         }
     }
@@ -53,7 +55,40 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
     // 위치 정보 권한을 요청
     // 권한 상태 변경 시, locationManager(_:didChangeAuthorization:) 메서드를 통해 변경된 권한 상태를 웹뷰에 전달
     func requestLocationPermission() {
-        locationManager.requestWhenInUseAuthorization()
+        locationManager.requestAlwaysAuthorization()
+        // locationManager.requestWhenInUseAuthorization()
+    }
+
+    func checkLocationPermissionEnabled() {
+            let enabled = CLLocationManager.locationServicesEnabled()
+            let jsCode = """
+                window.locationPermissionEnabled = '\(enabled)';
+            """
+            self.webView.evaluateJavaScript(jsCode)
+    }
+
+    func checkNotificationPErmissionEnabled() {
+            let current = UNUserNotificationCenter.current()
+
+            current.getNotificationSettings(completionHandler: { (settings) in
+                if settings.authorizationStatus == .authorized {
+                    let jsCode = """
+                        window.notificationPermissionEnabled = '\(true)';
+                    """
+                    print(jsCode)
+                    self.webView.evaluateJavaScript(jsCode)
+                } else {
+                    let jsCode = """
+                        window.notificationPermissionEnabled = '\(false)';
+                    """
+                    print(jsCode)
+                    self.webView.evaluateJavaScript(jsCode)
+                }
+            })
+    }
+    func checkPermissiionEnabled() {
+        checkLocationPermissionEnabled()
+        checkNotificationPErmissionEnabled()
     }
     
     //  웹뷰에서 notificationPermissionRequest 또는 locationPermissionRequest 메시지를 받을 때 해당 권한을 요청하는 로직을 실행
@@ -62,19 +97,53 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
             requestNotificationPermission()
         } else if message.name == "locationPermissionRequest" {
             requestLocationPermission()
+        } else if message.name == "setLocationServicesEnabled" {
+            let enabled = CLLocationManager.locationServicesEnabled()
+            let jsCode = """
+                window.locationPermissionEnabled = '\(enabled)';
+            """
+            self.webView.evaluateJavaScript(jsCode)
+        } else if message.name == "setNotificationPermissionEnabled" {
+            let current = UNUserNotificationCenter.current()
+
+            current.getNotificationSettings(completionHandler: { (settings) in
+                if settings.authorizationStatus == .authorized {
+                    let jsCode = """
+                        window.notificationPermissionEnabled = '\(true)';
+                    """
+                    print(jsCode)
+                    self.webView.evaluateJavaScript(jsCode)
+                } else {
+                    let jsCode = """
+                        window.notificationPermissionEnabled = '\(false)';
+                    """
+                    print(jsCode)
+                    self.webView.evaluateJavaScript(jsCode)
+                }
+            })
         }
     }
     
     // CLLocationManagerDelegate methods
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        print("call")
+        var granted = false
+
         switch status {
         case .authorizedAlways:
-            webView.evaluateJavaScript("setLocationPermission(true)")
+            granted = true
+        print("위치 정보 권한이 항상 허용되었습니다.")
         case .authorizedWhenInUse, .denied, .restricted:
-            webView.evaluateJavaScript("setLocationPermission(false)")
+            granted = false;
         default:
             break
         }
+        
+        let jsCode = """
+            window.LocationServicesEnabled = '\(granted)';
+        """
+
+        self.webView.evaluateJavaScript(jsCode)
     }
 }
 
