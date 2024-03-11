@@ -62,6 +62,13 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
             }
         }
     }
+    func updateNotificationPermissionEnabled() {
+        UNUserNotificationCenter.current().getNotificationSettings(completionHandler: {settings in
+            let enabled = settings.authorizationStatus == .authorized
+            let jsCode = "if (window.updateNotificationPermissionEnabled) { window.updateNotificationPermissionEnabled('\(enabled)'); }"
+            self.webView.evaluateJavaScript(jsCode, completionHandler: nil)
+        })
+    }
     // JavaScript로부터 메시지를 받는 메서드
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         if message.name == "nativeApp" {
@@ -80,17 +87,10 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
             }
         }
     }
-    func updateNotificationPermissionEnabled() {
-        UNUserNotificationCenter.current().getNotificationSettings(completionHandler: {settings in
-            let enabled = settings.authorizationStatus == .authorized
-            let jsCode = "if (window.updateNotificationPermissionEnabled) { window.updateNotificationPermissionEnabled('\(enabled)'); }"
-            self.webView.evaluateJavaScript(jsCode, completionHandler: nil)
-        })
-    }
 
     func requestNotificationPermission(){
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge], completionHandler: {didAllow,Error in
-            updateNotificationPermissionEnabled()
+            self.updateNotificationPermissionEnabled()
         })
     }
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
