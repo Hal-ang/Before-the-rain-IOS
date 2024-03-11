@@ -35,7 +35,7 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
         // 웹뷰 로딩이 완료된 후 필요한 JavaScript 코드 실행
         // 예: 초기 위치 권한 상태 전달
     }
-    
+
     func updateLocationPermissionEnabled() {
         let enabled = CLLocationManager.locationServicesEnabled()
         print("Location permission enabled: \(enabled)")
@@ -48,12 +48,10 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
             }
             
         webView.evaluateJavaScript(jsCode, completionHandler: nil)
-
     }
 
     // 위치 정보 업데이트 콜백
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        print("call?", locations.last)
         if let location = locations.last {
             let jsCode = "window.updateLocation(\(location.coordinate.latitude), \(location.coordinate.longitude));"
             print(location.coordinate.latitude, location.coordinate.longitude)
@@ -71,10 +69,30 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
                 updateLocationPermissionEnabled()
             } else if message.body as! String == "startUpdatingLocation" {
                 locationManager.startUpdatingLocation()
+            } else if message.body as! String == "stopUpdatingLocation" {
+                locationManager.stopUpdatingLocation()
+            } else if message.body as! String == "requestLocationPermission" {
+                locationManager.requestAlwaysAuthorization() // 백그라운드에서도 위치 정보 사용 권한 요청
+            } else if message.body as! String == "requestNotificationPermission" {
+                requestNotificationPermission()
+            } else if message.body as! String == "updateNotificationPermissionEnabled" {
+                updateNotificationPermissionEnabled()
             }
         }
     }
+    func updateNotificationPermissionEnabled() {
+        UNUserNotificationCenter.current().getNotificationSettings(completionHandler: {settings in
+            let enabled = settings.authorizationStatus == .authorized
+            let jsCode = "if (window.updateNotificationPermissionEnabled) { window.updateNotificationPermissionEnabled('\(enabled)'); }"
+            self.webView.evaluateJavaScript(jsCode, completionHandler: nil)
+        })
+    }
 
+    func requestNotificationPermission(){
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge], completionHandler: {didAllow,Error in
+            updateNotificationPermissionEnabled()
+        })
+    }
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         let enabled = CLLocationManager.locationServicesEnabled()
 
