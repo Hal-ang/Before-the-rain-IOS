@@ -162,23 +162,3 @@ struct WeatherWidget: Widget {
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
-
-
-struct WeatherWidgetEntryView_Previews: PreviewProvider {
-    static var previews: some View {
-        // 미리보기를 위한 샘플 데이터를 생성합니다.
-        let sampleEntry = WeatherEntry(date: Date(), temperature: 7.73, weatherDescription: "맑음", pop: 0, clothes: [
-            Clothes(id: 22, name: "니트"),
-            Clothes(id: 31, name: "울코트"),
-            Clothes(id: 32, name: "가죽 재킷"),
-            Clothes(id: 33, name: "스카프"),
-            Clothes(id: 34, name: "두꺼운 바지")
-            // 더 많은 옷차림 데이터를 추가할 수 있습니다.
-        ])
-
-        // WeatherWidgetEntryView 미리보기를 구성합니다.
-        WeatherWidgetEntryView(entry: sampleEntry)
-            .previewContext(WidgetPreviewContext(family: .systemMedium)) // 위젯 사이즈 선택
-    }
-}
-
