@@ -17,14 +17,14 @@ struct WeatherProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (WeatherEntry) -> ()) {
-        fetchWeatherData(lat: 37.7749, lon: -122.4194) { weatherData in
+        fetchWeatherData() { weatherData in
             let entry = WeatherEntry(date: Date(), temperature: weatherData?.temp ?? 0.0, pop: weatherData?.pop ?? 0.0, symbol: weatherData?.symbol ?? "sun.max.fill", clothes: weatherData?.clothes ?? [])
             completion(entry)
         }
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<WeatherEntry>) -> ()) {
-        fetchWeatherData(lat: 37.7749, lon: -122.4194) { weatherData in
+        fetchWeatherData() { weatherData in
             let currentDate = Date()
             let entry = WeatherEntry(date: currentDate, temperature: weatherData?.temp ?? 0.0, pop: weatherData?.pop ?? 0.0, symbol: weatherData?.symbol ?? "sun.max.fill", clothes: weatherData?.clothes ?? [])
             let nextUpdateDate = Calendar.current.date(byAdding: .hour, value: 1, to: currentDate)!
@@ -33,7 +33,13 @@ struct WeatherProvider: TimelineProvider {
         }
     }
 
-  func fetchWeatherData(lat: Double, lon: Double, completion: @escaping (WeatherData?) -> Void) {
+  func fetchWeatherData(completion: @escaping (WeatherData?) -> Void) {
+    let userDefaults = UserDefaults(suiteName: "group.com.btr.shared")
+    guard let lat = userDefaults?.double(forKey: "latitude"),
+          let lon = userDefaults?.double(forKey: "longitude") else {
+        completion(nil)
+        return
+    }
     let urlString = "http://192.168.35.173:4000/weathers/widget?lat=\(lat)&lon=\(lon)"
     guard let url = URL(string: urlString) else {
         completion(nil)
