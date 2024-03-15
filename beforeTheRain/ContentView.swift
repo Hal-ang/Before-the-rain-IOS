@@ -27,6 +27,7 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestAlwaysAuthorization() // 백그라운드에서도 위치 정보 사용 권한 요청
         let myURL = URL(string: "https://enormously-pretty-weevil.ngrok-free.app")
+        // let myURL = URL(string: "http://192.168.35.173:3000")
         let myRequest = URLRequest(url: myURL!)
         webView.load(myRequest)
     }
@@ -53,6 +54,10 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
     // 위치 정보 업데이트 콜백
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.last {
+            let userDefaults = UserDefaults(suiteName: "group.com.btr.shared")
+            userDefaults?.set(location.coordinate.latitude, forKey: "latitude")
+            userDefaults?.set(location.coordinate.longitude, forKey: "longitude")
+
             let jsCode = "window.updateLocation(\(location.coordinate.latitude), \(location.coordinate.longitude));"
             print(location.coordinate.latitude, location.coordinate.longitude)
             webView.evaluateJavaScript(jsCode) { (result, error) in
