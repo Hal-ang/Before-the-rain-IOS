@@ -12,75 +12,77 @@ import SwiftUI
 import Intents
 
 struct WeatherProvider: TimelineProvider {
-    static var sampleClothes: [Clothes] {
-        return [
-            Clothes(id: 22, name: "니트"),
-            Clothes(id: 31, name: "울코트"),
-            Clothes(id: 32, name: "가죽 재킷"),
-            Clothes(id: 33, name: "스카프"),
-            Clothes(id: 34, name: "두꺼운 바지"),
-            Clothes(id: 35, name: "가죽 옷"),
-            Clothes(id: 36, name: "히트텍"),
-            Clothes(id: 37, name: "캐시미어 코트"),
-            Clothes(id: 38, name: "플리스 재킷"),
-            Clothes(id: 39, name: "경량패딩"),
-            Clothes(id: 40, name: "목폴라")
-        ]
-    }
     func placeholder(in context: Context) -> WeatherEntry {
-        WeatherEntry(date: Date(), temperature: 0.0, weatherDescription: "맑음", pop: 0.0, clothes: [])
+        WeatherEntry(date: Date(), temperature: 0.0, pop: 0.0, symbol: "sun.max.fill", clothes: [])
     }
 
     func getSnapshot(in context: Context, completion: @escaping (WeatherEntry) -> ()) {
-        let entry = WeatherEntry(date: Date(), temperature: 7.73, weatherDescription: "맑음", pop: 0.0, clothes: WeatherProvider.sampleClothes)
-        completion(entry)
+        fetchWeatherData(lat: 37.7749, lon: -122.4194) { weatherData in
+            let entry = WeatherEntry(date: Date(), temperature: weatherData?.temp ?? 0.0, pop: weatherData?.pop ?? 0.0, symbol: weatherData?.symbol ?? "sun.max.fill", clothes: weatherData?.clothes ?? [])
+            completion(entry)
+        }
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<WeatherEntry>) -> ()) {
-        var entries: [WeatherEntry] = []
-        
-        // 현재 시간으로부터 한 시간 간격으로 데이터를 갱신합니다.
-        let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = WeatherEntry(date: entryDate, temperature: 7.73, weatherDescription: "맑음", pop: 0.0, clothes: WeatherProvider.sampleClothes)
-            entries.append(entry)
+        fetchWeatherData(lat: 37.7749, lon: -122.4194) { weatherData in
+            let currentDate = Date()
+            let entry = WeatherEntry(date: currentDate, temperature: weatherData?.temp ?? 0.0, pop: weatherData?.pop ?? 0.0, symbol: weatherData?.symbol ?? "sun.max.fill", clothes: weatherData?.clothes ?? [])
+            let nextUpdateDate = Calendar.current.date(byAdding: .hour, value: 1, to: currentDate)!
+            let timeline = Timeline(entries: [entry], policy: .after(nextUpdateDate))
+            completion(timeline)
+        }
+    }
+
+  func fetchWeatherData(lat: Double, lon: Double, completion: @escaping (WeatherData?) -> Void) {
+    let urlString = "http://192.168.35.173:4000/weathers/widget?lat=\(lat)&lon=\(lon)"
+    guard let url = URL(string: urlString) else {
+        completion(nil)
+        return
+    }
+
+    let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        guard let data = data, error == nil else {
+            print("Network request error: \(error!)")
+            completion(nil)
+            return
         }
 
-        let timeline = Timeline(entries: entries, policy: .atEnd)
-        completion(timeline)
+        do {
+            let weatherData = try JSONDecoder().decode(WeatherData.self, from: data)
+            print("Decoded Weather Data: \(weatherData)")
+            completion(weatherData)
+        } catch {
+            print("JSON decoding error: \(error)")
+            completion(nil)
+        }
     }
+    task.resume()
+  }
 }
 
 
 struct WeatherEntry: TimelineEntry {
     let date: Date
     let temperature: Double
-    let weatherDescription: String
-    let pop: Double // 강수 확률
+    let pop: Double
+    let symbol: String
     let clothes: [Clothes]
 }
 
-struct Clothes: Identifiable {
+struct Clothes: Codable, Identifiable {
     let id: Int
     let name: String
 }
 
 // 데이터 모델에 해당하는 부분입니다.
-struct WeatherModel {
+struct WeatherData : Codable{
     let dt: Int
     let temp: Double
-    let weather: [WeatherDetail]
     let pop: Double
+    let symbol: String
     let clothes: [Clothes]
 }
 
-struct WeatherDetail {
-    let id: Int
-    let main: String
-    let description: String
-    let icon: String
-}
 struct WeatherWidgetEntryView : View {
     var entry: WeatherEntry
 
