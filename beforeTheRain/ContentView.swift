@@ -1,4 +1,5 @@
 import SwiftUI
+import FirebaseMessaging
 import UIKit
 import WebKit
 import UserNotifications
@@ -85,6 +86,21 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
             }
         }
     }
+
+    func getFCMToken() {
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("Error fetching FCM registration token: \(error)")
+            } else if let token = token {
+                let jsCode = "window.updateFCMToken('\(token)');"
+                self.webView.evaluateJavaScript(jsCode) { (result, error) in
+                    if let error = error {
+                        print("Error updating FCM token in webview: \(error)")
+                    }
+                }
+            }
+        }
+    }
     // JavaScript로부터 메시지를 받는 메서드
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         if message.name == "nativeApp" {
@@ -102,6 +118,9 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
                 updateNotificationPermissionEnabled()
             } else if message.body as! String == "getUserCoordinates" {
                 getUserCoordinates()
+            } else if message.body as! String == "getFCMToken" {
+                getFCMToken()
+            
             }
         }
     }
