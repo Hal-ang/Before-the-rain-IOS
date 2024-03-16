@@ -1,4 +1,5 @@
 import SwiftUI
+import FirebaseMessaging
 import UIKit
 import WebKit
 import UserNotifications
@@ -16,6 +17,9 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
         
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
         webView.uiDelegate = self
+        if #available(iOS 17.4, *) {
+            webView.isInspectable = true
+        }
         view = webView
     }
     
@@ -26,8 +30,8 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
         locationManager.allowsBackgroundLocationUpdates = true
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestAlwaysAuthorization() // 백그라운드에서도 위치 정보 사용 권한 요청
-        let myURL = URL(string: "https://enormously-pretty-weevil.ngrok-free.app")
-        // let myURL = URL(string: "http://192.168.35.173:3000")
+        // let myURL = URL(string: "https://enormously-pretty-weevil.ngrok-free.app")
+        let myURL = URL(string: "http://192.168.35.237:3000")
         let myRequest = URLRequest(url: myURL!)
         webView.load(myRequest)
     }
@@ -53,18 +57,11 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
 
     // 위치 정보 업데이트 콜백
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+     
         if let location = locations.last {
             let userDefaults = UserDefaults(suiteName: "group.com.btr.shared")
             userDefaults?.set(location.coordinate.latitude, forKey: "latitude")
             userDefaults?.set(location.coordinate.longitude, forKey: "longitude")
-
-            let jsCode = "window.updateLocation(\(location.coordinate.latitude), \(location.coordinate.longitude));"
-            print(location.coordinate.latitude, location.coordinate.longitude)
-            webView.evaluateJavaScript(jsCode) { (result, error) in
-                if let error = error {
-                    print("Error updating location in webview: \(error)")
-                }
-            }
         }
     }
     func updateNotificationPermissionEnabled() {
@@ -73,6 +70,36 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
             let jsCode = "if (window.updateNotificationPermissionEnabled) { window.updateNotificationPermissionEnabled('\(enabled)'); }"
             self.webView.evaluateJavaScript(jsCode, completionHandler: nil)
         })
+    }
+    func getUserCoordinates() {
+        let userDefaults = UserDefaults(suiteName: "group.com.btr.shared")
+        guard let lat = userDefaults?.double(forKey: "latitude"),
+            let lon = userDefaults?.double(forKey: "longitude") else {
+            return
+        }
+
+        let jsCode = "window.updateLocation(\(lat), \(lon));"
+
+        webView.evaluateJavaScript(jsCode) { (result, error) in
+            if let error = error {
+                print("Error updating location in webview: \(error)")
+            }
+        }
+    }
+
+    func getFCMToken() {
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("Error fetching FCM registration token: \(error)")
+            } else if let token = token {
+                let jsCode = "window.updateFCMToken('\(token)');"
+                self.webView.evaluateJavaScript(jsCode) { (result, error) in
+                    if let error = error {
+                        print("Error updating FCM token in webview: \(error)")
+                    }
+                }
+            }
+        }
     }
     // JavaScript로부터 메시지를 받는 메서드
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -89,6 +116,11 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
                 requestNotificationPermission()
             } else if message.body as! String == "updateNotificationPermissionEnabled" {
                 updateNotificationPermissionEnabled()
+            } else if message.body as! String == "getUserCoordinates" {
+                getUserCoordinates()
+            } else if message.body as! String == "getFCMToken" {
+                getFCMToken()
+            
             }
         }
     }
@@ -99,12 +131,12 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
         })
     }
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        let enabled = CLLocationManager.locationServicesEnabled()
-
-        // 권한이 부여되었는지 확인하고 위치 업데이트 시작
-        if enabled == true {
-            locationManager.startUpdatingLocation()
+        DispatchQueue.global().async { [self] in
+            if CLLocationManager.locationServicesEnabled() {
+                locationManager.startUpdatingLocation()
+            }
         }
+        // 권한이 부여되었는지 확인하고 위치 업데이트 시작
     }
 }
 

@@ -10,6 +10,7 @@ import SwiftData
 
 @main
 struct beforeTheRainApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
         ])
