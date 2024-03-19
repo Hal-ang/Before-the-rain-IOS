@@ -31,7 +31,7 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestAlwaysAuthorization() // 백그라운드에서도 위치 정보 사용 권한 요청
         // let myURL = URL(string: "https://enormously-pretty-weevil.ngrok-free.app")
-        let myURL = URL(string: "http://192.168.35.237:3000")
+        let myURL = URL(string: "http://192.168.45.250:3000")
         let myRequest = URLRequest(url: myURL!)
         webView.load(myRequest)
     }

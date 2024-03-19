@@ -32,6 +32,66 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         
         return true
     }
+
+    // FCM으로부터 사일런트 푸시 알림을 받는 메소드 구현
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        print("call silent")
+        // 사일런트 푸시 알림에서 요청 유형 확인
+        if let requestType = userInfo["requestType"] as? String {
+            // UserDefaults에서 위치 정보를 읽고 조건에 따라 서로 다른 서버로 요청
+            if let period: String = userInfo["period"] as? String {
+                sendLocationToServer(requestType: requestType, period: period)
+            } else {
+                sendLocationToServer(requestType: requestType)
+            }
+        }
+        
+        completionHandler(.newData)
+    }
+
+    // 조건에 따라 서로 다른 서버로 위치 정보와 requestType을 보내는 메소드
+    func sendLocationToServer(requestType: String, period:String? = nil) {
+        let userDefaults = UserDefaults(suiteName: "group.com.btr.shared")
+
+        guard let lat = userDefaults?.value(forKey: "latitude") as? Double,
+            let lon = userDefaults?.value(forKey: "longitude") as? Double,
+            let fcmToken = userDefaults?.string(forKey: "FCMToken") else {
+            print("Error: Couldn't find necessary data in UserDefaults.")
+            return
+        }
+        
+        // 공통 서버 URL. 실제 사용 시에는 적절한 URL로 변경해야 함
+        let baseUrl = "http://192.168.45.250:4000/weathers/push"
+        
+        var components = URLComponents(string: baseUrl)!
+        components.queryItems = [
+            URLQueryItem(name: "lat", value: "\(lat)"),
+            URLQueryItem(name: "lat", value: "\(lon)"),
+            URLQueryItem(name: "type", value: requestType)
+        ]
+
+        if let period = period {
+            components.queryItems?.append(URLQueryItem(name: "period", value: period))
+        }
+
+        var request = URLRequest(url: components.url!)
+        request.httpMethod = "HEAD"
+
+        // FCM 토큰을 Authorization 헤더에 추가
+        request.setValue("\(fcmToken)", forHTTPHeaderField: "Authorization")
+
+        let session = URLSession.shared
+        let task = session.dataTask(with: request) { data, response, error in
+            // 여기서 응답 처리
+            if let error = error {
+                print("Error sending location and requestType to server: \(error)")
+                return
+            }
+            
+            print("Location and requestType sent to server successfully.")
+        }
+        task.resume()
+    }
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
@@ -59,7 +119,9 @@ extension AppDelegate: MessagingDelegate {
         object: nil,
         userInfo: dataDict
     )
-    // TODO: If necessary send token to application server.
+    let userDefaults = UserDefaults(suiteName: "group.com.btr.shared")
+    userDefaults?.set(fcmToken, forKey: "FCMToken")
+    userDefaults?.synchronize()
     // Note: This callback is fired at each app startup and whenever a new token is generated.
     }
 }
