@@ -60,8 +60,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             return
         }
         
-        // 공통 서버 URL. 실제 사용 시에는 적절한 URL로 변경해야 함
-        let baseUrl = "http://192.168.45.250:4000/weathers/push"
+        let baseUrl = "https://www.btr-server.shop/weathers/push"
         
         var components = URLComponents(string: baseUrl)!
         components.queryItems = [
