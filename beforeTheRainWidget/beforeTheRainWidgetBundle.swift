@@ -11,8 +11,6 @@ import SwiftUI
 @main
 struct beforeTheRainWidgetBundle: WidgetBundle {
     var body: some Widget {
-        beforeTheRainWidget()
-        beforeTheRainWidgetLiveActivity()
         WeatherWidget()
     }
 }

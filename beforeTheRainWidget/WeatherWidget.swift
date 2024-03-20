@@ -40,7 +40,7 @@ struct WeatherProvider: TimelineProvider {
         completion(nil)
         return
     }
-    let urlString = "http://192.168.35.173:4000/weathers/widget?lat=\(lat)&lon=\(lon)"
+    let urlString = "https://www.btr-server.shop/weathers/widget?lat=\(lat)&lon=\(lon)"
     guard let url = URL(string: urlString) else {
         completion(nil)
         return
