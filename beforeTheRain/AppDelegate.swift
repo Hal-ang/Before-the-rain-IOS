@@ -60,7 +60,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             return
         }
         
-        let baseUrl = "https://www.btr-server.shop/weathers/push"
+        let baseUrl = "https://btr-server.shop/weathers/push"
         
         var components = URLComponents(string: baseUrl)!
         components.queryItems = [
