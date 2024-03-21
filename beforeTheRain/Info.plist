@@ -8,14 +8,16 @@
 		<string>YES</string>
 	</dict>
 	<key>Privacy - Location When in Use Usage Description</key>
-	<string>(앱 사용중) 사용자의 현재 위치를 기반으로 날씨나 장소정보를 제공하기 위해 필요한 권한</string>
+	<string>(앱 사용중) 사용자의 현재 위치를 기반으로 날씨 정보를 제공하기 위해 필요한 권한 (앱을 사용하는 동안에만 위치정보를 수신합니다.)</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>사용자의 현재 위치를 기반으로 날씨 정보를 제공하기 위해 필요한 권한 (앱을 사용하는 동안에만 위치정보를 수신합니다.)</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
 		<string>location</string>
 		<string>remote-notification</string>
 	</array>
-	<key>ITSAppUsesNonExemptEncryption</key> 
-  <false/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
