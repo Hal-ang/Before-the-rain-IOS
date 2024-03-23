@@ -40,50 +40,62 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
         // 예: 초기 위치 권한 상태 전달
     }
 
-    func updateLocationPermissionEnabled() {
-        let enabled = CLLocationManager.locationServicesEnabled()
-        print("Location permission enabled: \(enabled)")
-
-        let jsCode = "if (window.updateLocationPermissionEnabled) { window.updateLocationPermissionEnabled('\(enabled)'); }"
-            webView.evaluateJavaScript(jsCode) { (result, error) in
-                if let error = error {
-                    print("Error updating location in webview: \(error)")
-                }
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        DispatchQueue.global().async { [self] in
+            // 권한이 부여되었는지 확인하고 위치 업데이트 시작
+            let enabled = CLLocationManager.locationServicesEnabled()
+            print("locationManagerDidChangeAuthorization" , enabled)
+            if enabled {
+                locationManager.startUpdatingLocation()
+            } else {
+                locationManager.requestAlwaysAuthorization()
             }
-            
-        webView.evaluateJavaScript(jsCode, completionHandler: nil)
+        }
     }
 
     // 위치 정보 업데이트 콜백
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-     
         if let location = locations.last {
             let userDefaults = UserDefaults(suiteName: "group.com.btr.shared")
             userDefaults?.set(location.coordinate.latitude, forKey: "latitude")
             userDefaults?.set(location.coordinate.longitude, forKey: "longitude")
-        }
-    }
-    func updateNotificationPermissionEnabled() {
-        UNUserNotificationCenter.current().getNotificationSettings(completionHandler: {settings in
-            let enabled = settings.authorizationStatus == .authorized
-            let jsCode = "if (window.updateNotificationPermissionEnabled) { window.updateNotificationPermissionEnabled('\(enabled)'); }"
-            self.webView.evaluateJavaScript(jsCode, completionHandler: nil)
-        })
-    }
-    func getUserCoordinates() {
-        let userDefaults = UserDefaults(suiteName: "group.com.btr.shared")
-        guard let lat = userDefaults?.double(forKey: "latitude"),
-            let lon = userDefaults?.double(forKey: "longitude") else {
-            return
-        }
 
-        let jsCode = "window.updateLocation(\(lat), \(lon));"
+            let jsCode = "if(window.updateLocation) {window.updateLocation(\(location.coordinate.latitude), \(location.coordinate.longitude));}"
 
-        webView.evaluateJavaScript(jsCode) { (result, error) in
+            webView.evaluateJavaScript(jsCode) { (result, error) in
             if let error = error {
                 print("Error updating location in webview: \(error)")
             }
         }
+        }
+    }
+
+    // JavaScript로부터 메시지를 받는 메서드
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        if message.name == "nativeApp" {
+            if message.body as! String == "startUpdatingLocation" {
+                locationManager.startUpdatingLocation()
+            } else if message.body as! String == "stopUpdatingLocation" {
+                locationManager.stopUpdatingLocation()
+            } else if message.body as! String == "requestLocationPermission" {
+                locationManager.requestAlwaysAuthorization() // 백그라운드에서도 위치 정보 사용 권한 요청
+            } else if message.body as! String == "requestNotificationPermission" {
+                requestNotificationPermission()
+            } else if message.body as! String == "updateNotificationPermissionEnabled" {
+                updateNotificationPermissionEnabled()
+            } else if message.body as! String == "getFCMToken" {
+                getFCMToken()
+            
+            }
+        }
+    }
+
+    func updateNotificationPermissionEnabled() {
+        UNUserNotificationCenter.current().getNotificationSettings(completionHandler: {settings in
+            let enabled = settings.authorizationStatus == .authorized
+            let jsCode = "window.updateNotificationPermissionEnabled('\(enabled)')"
+            self.webView.evaluateJavaScript(jsCode, completionHandler: nil)
+        })
     }
 
     func getFCMToken() {
@@ -100,43 +112,14 @@ class MyViewController: UIViewController, WKUIDelegate, WKScriptMessageHandler, 
             }
         }
     }
-    // JavaScript로부터 메시지를 받는 메서드
-    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        if message.name == "nativeApp" {
-            if message.body as! String == "updateLocationPermissionEnabled" {
-                updateLocationPermissionEnabled()
-            } else if message.body as! String == "startUpdatingLocation" {
-                locationManager.startUpdatingLocation()
-            } else if message.body as! String == "stopUpdatingLocation" {
-                locationManager.stopUpdatingLocation()
-            } else if message.body as! String == "requestLocationPermission" {
-                locationManager.requestAlwaysAuthorization() // 백그라운드에서도 위치 정보 사용 권한 요청
-            } else if message.body as! String == "requestNotificationPermission" {
-                requestNotificationPermission()
-            } else if message.body as! String == "updateNotificationPermissionEnabled" {
-                updateNotificationPermissionEnabled()
-            } else if message.body as! String == "getUserCoordinates" {
-                getUserCoordinates()
-            } else if message.body as! String == "getFCMToken" {
-                getFCMToken()
-            
-            }
-        }
-    }
 
     func requestNotificationPermission(){
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge], completionHandler: {didAllow,Error in
             self.updateNotificationPermissionEnabled()
         })
     }
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        DispatchQueue.global().async { [self] in
-            if CLLocationManager.locationServicesEnabled() {
-                locationManager.startUpdatingLocation()
-            }
-        }
-        // 권한이 부여되었는지 확인하고 위치 업데이트 시작
-    }
+
+
 }
 
 struct MyView: UIViewControllerRepresentable {
