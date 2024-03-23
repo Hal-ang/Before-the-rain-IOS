@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3F1E546F2BA49D8C00E744ED /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3F1E546E2BA49D8C00E744ED /* GoogleService-Info.plist */; };
+		3F1113AB2BAEDE9D00B8D376 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3F1113AA2BAEDE9C00B8D376 /* GoogleService-Info.plist */; };
 		3F3B82772B9DDD7A001638A8 /* beforeTheRainApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3B82762B9DDD7A001638A8 /* beforeTheRainApp.swift */; };
 		3F3B82792B9DDD7A001638A8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3B82782B9DDD7A001638A8 /* ContentView.swift */; };
 		3F3B827D2B9DDD7E001638A8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3F3B827C2B9DDD7E001638A8 /* Assets.xcassets */; };
@@ -72,7 +72,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		3F1E546E2BA49D8C00E744ED /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		3F1113AA2BAEDE9C00B8D376 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		3F3B82732B9DDD7A001638A8 /* beforeTheRain.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = beforeTheRain.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F3B82762B9DDD7A001638A8 /* beforeTheRainApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = beforeTheRainApp.swift; sourceTree = "<group>"; };
 		3F3B82782B9DDD7A001638A8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -166,7 +166,7 @@
 		3F3B82752B9DDD7A001638A8 /* beforeTheRain */ = {
 			isa = PBXGroup;
 			children = (
-				3F1E546E2BA49D8C00E744ED /* GoogleService-Info.plist */,
+				3F1113AA2BAEDE9C00B8D376 /* GoogleService-Info.plist */,
 				3F76206C2BA43C91006BD3BD /* beforeTheRain.entitlements */,
 				3F3B82A52B9E01E4001638A8 /* Info.plist */,
 				3F3B82762B9DDD7A001638A8 /* beforeTheRainApp.swift */,
@@ -366,7 +366,7 @@
 			files = (
 				3F3B82802B9DDD7E001638A8 /* Preview Assets.xcassets in Resources */,
 				3F3B827D2B9DDD7E001638A8 /* Assets.xcassets in Resources */,
-				3F1E546F2BA49D8C00E744ED /* GoogleService-Info.plist in Resources */,
+				3F1113AB2BAEDE9D00B8D376 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
